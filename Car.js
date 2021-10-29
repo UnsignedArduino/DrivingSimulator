@@ -113,11 +113,11 @@ class Car {
           if (collideLineLine(l2[0].x, l2[0].y, l2[1].x, l2[1].y,
                               l[0].x, l[0].y, l[1].x, l[1].y)) {
               // Destroy this car with we overlap
-              cars.splice(this.id, 1);
+              // cars.splice(this.id, 1);
               // Shift all the IDs down
-              for (let i = 0; i < cars.length; i ++) {
-                cars[i].id = i;
-              }
+              // for (let i = 0; i < cars.length; i ++) {
+              //   cars[i].id = i;
+              // }
               break;
           }
         }

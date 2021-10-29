@@ -19,9 +19,10 @@ class GameMap {
     this.starts.push(start);
   }
 
-  addNode(x, y) {
-    let closestNode = null;
-    this.nodes.push(new Node(mouseX, mouseY));
+  addNode() {
+    let node = new Node(mouseX, mouseY);
+    this.nodes.push(node);
+    return node;
   }
 
   update() {
@@ -51,13 +52,14 @@ class GameMap {
            this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
       pop();
     }
-    // Draw red dots to show all the node points
     if (showNodePos) {
-      for (let node of this.nodes) {
-        noStroke();
-        fill(255, 0, 0);
-        circle(node.pos.x, node.pos.y, 5);
-      }
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nodes.length; n ++) {
+        circle(this.nodes[n].pos.x, this.nodes[n].pos.y, 5)
+      } 
+      pop();
     }
   }
 }
@@ -71,7 +73,7 @@ class Node {
 
   addNextNode() {
     this.nextNodes.push(new Node(mouseX, mouseY));
-    if (this.nextNodes.length == 1){
+    if (this.nextNodes.length == 1) {
       this.nextNodes[0].pos = this.pos.copy()
     }
   }
@@ -90,6 +92,16 @@ class Node {
            this.nextNodes[i-1].pos.x, this.nextNodes[i-1].pos.y);
     }
     pop();
+
+    if (showNodePos) {
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nextNodes.length; n ++) {
+        circle(this.nextNodes[n].pos.x, this.nextNodes[n].pos.y, 5)
+      } 
+      pop();
+    }
   }
 }
 
