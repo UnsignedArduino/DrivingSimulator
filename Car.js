@@ -14,24 +14,23 @@ class Car {
     this.edgeLines = [];
     this.isSlowing = false;
     this.goPass = false;
-    let r = titanIterator
-    this.closestDistance = 9999999
+    let r = titanIterator;
+    this.closestDistance = 9999999999999;
     this.nodes = [...maps[r].nodes];
-    this.powerArr = []
-    this.uni = null
-    this.pos = createVector(this.nodes[0].pos.x, this.nodes[0].pos.y)
-    this.elevation = 0
+    this.powerArr = [];
+    this.uni = null;
+    this.pos = createVector(this.nodes[0].pos.x, this.nodes[0].pos.y);
+    this.elevation = 0;
     // Nice random color that doesn't involve red (so we can see taillights)
     this.COLOR = color(0, random(0, 255), random(0, 255));
-
     titanIterator++
-    if (titanIterator > maps.length-1){
-      titanIterator = 0
+    if (titanIterator > maps.length - 1) {
+      titanIterator = 0;
     }
   }
 
   show(index) {
-    if (this.elevation != index){
+    if (this.elevation != index) {
       return
     }
     // Draw the car to the screen

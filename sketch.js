@@ -78,6 +78,7 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight)
   //maps.push(new GameMap())
   //map = new GameMap();
+  makeButtons();
   prevPos = createVector(0, 0);
   setInterval(() => {
     fpsToShow = round(frameRate());
@@ -90,6 +91,7 @@ function draw() {
   calculateBranching();
   updateMouseHint();
   updateMouseStuff();
+  
   textSize(12);
   push();
   textAlign(RIGHT);
@@ -113,22 +115,20 @@ function draw() {
     on++
   }
 
-  
-  
+  updateButtons();
 
   // Draw a mouse hint to show what would happen
-  const tooltipHeight = 2;
-  push();
-  fill(255, 255, 255);
-  rect(mouseX - 3, mouseY - 19 - tooltipHeight,
-       textWidth(whatWouldHappen) + 6,
-       textSize() + 5 - tooltipHeight);
-  fill(0, 0, 0);
-  text(whatWouldHappen, mouseX, mouseY - 7 - tooltipHeight);
-  pop();
-
-  // Draw all the cars
-  
+  if (whatWouldHappen != "") {
+    const tooltipHeight = 2;
+    push();
+    fill(255, 255, 255);
+    rect(mouseX - 3, mouseY - 19 - tooltipHeight,
+        textWidth(whatWouldHappen) + 6,
+        textSize() + 5 - tooltipHeight);
+    fill(0, 0, 0);
+    text(whatWouldHappen, mouseX, mouseY - 7 - tooltipHeight);
+    pop();
+  }
 
   // Update the cars if we are running
   if (run) {
@@ -138,7 +138,7 @@ function draw() {
         cars[i].update();
       }
       if (FRAME % 5) {
-        if (cars.length > 0) {
+        if (cars.length > 1) {
           // Only create a car if we are far enough away from the last one
           // So we don't overlap with a car and get stuck
           if (dist(cars[cars.length - 1].pos.x, cars[cars.length - 1].pos.y, 
@@ -154,13 +154,12 @@ function draw() {
       }
       FRAME ++;
     }
-  }
-  else{
-    push()
-    textSize(30)
-    fill(255)
-    text("Elevation: "+drawLayer, 100, 100)
-    pop()
+  } else {
+    push();
+    textSize(30);
+    fill(255); 
+    text("Elevation: " + drawLayer, 100, 100);
+    pop();
   }
 }
 
@@ -187,6 +186,10 @@ function calculateBranching() {
 }
 
 function updateMouseHint() {
+  if (overlappingButtons()) {
+    whatWouldHappen = "";
+    return;
+  }
   if (dist(mouseX, mouseY, prevPos.x, prevPos.y) > clickAccuracy) {
     if (!branchMode) {
       // Not branching, add to main path
@@ -208,6 +211,9 @@ function updateMouseHint() {
 }
 
 function updateMouseStuff() {
+  if (overlappingButtons()) {
+    return;
+  }
   if (mouseHeld) {
     if (dist(mouseX, mouseY, prevPos.x, prevPos.y) > clickAccuracy) {
       if (!branchMode) {
@@ -233,7 +239,7 @@ function updateMouseStuff() {
         // If a branch isn't selected, then get the closest node
         whatWouldHappen = "Continue branch";
         if (!branchSelected) {
-          branchNum++
+          branchNum ++;
           whatWouldHappen = "Create new branch";
           closestIndex = [];
           closestDistance = 999999999999999999999999999999;
