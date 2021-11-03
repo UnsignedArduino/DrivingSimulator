@@ -75,7 +75,7 @@ function makeCheckButton(x, y, width, height, text, isEnabledFunc, isSelectedFun
 }
 
 function makeButtons() {
-  runButton = makeCheckButton(10, 10, 100, 30, "Run", 
+  runButton = makeCheckButton(10, 10, 100, 30, "Run (space)", 
     () => {  // Enabled
       return true;
     }, 
@@ -84,6 +84,37 @@ function makeButtons() {
     },
     () => {  // On press
       run = !run;
+    }
+  )
+  branchButton = makeCheckButton(10, 50, 100, 30, "Branch mode (s)",
+    () => {
+      return !run;
+    },
+    () => {
+      return branchMode;
+    },
+    () => {
+      branchMode = !branchMode;
+    }
+  )
+  upElevationButton = makeCommandButton(120, 10, 150, 30, "Increase elevation (↑)", 
+    () => {
+      return !run && drawLayer < 4;
+    }, 
+    () => {
+      if (drawLayer < 4) {
+        drawLayer ++;
+      }
+    }
+  )
+  downElevationButton = makeCommandButton(120, 50, 150, 30, "Decrease elevation (↓)", 
+    () => {
+      return !run && drawLayer > 0;
+    }, 
+    () => {
+      if (drawLayer > 0) {
+        drawLayer --;
+      }
     }
   )
 }
@@ -98,5 +129,7 @@ function overlappingButtons() {
 }
 
 function updateButtons() {
-  runButton.draw();
+  for (let btn of allButtons) {
+    btn.draw();
+  }
 }

@@ -74,8 +74,10 @@ function checkIfOverlappingMap() {
 
 function setup() {
   frameRate(120)
-  //createCanvas(width, height);
-  createCanvas(window.innerWidth, window.innerHeight)
+  width = window.innerWidth - 20;
+  height = window.innerHeight - 20;
+  createCanvas(width, height);
+  // createCanvas(window.innerWidth, window.innerHeight)
   //maps.push(new GameMap())
   //map = new GameMap();
   makeButtons();
@@ -92,27 +94,28 @@ function draw() {
   updateMouseHint();
   updateMouseStuff();
   
-  textSize(12);
+  // Draw FPS
   push();
+  textSize(12);
   textAlign(RIGHT);
   fill(255);
   text("FPS: " + fpsToShow, width - 10, 15);
   pop();
   
   // Draw the roads
-  let on = 0
-  let c = [...cars]
-  while (on <= 4){
+  let on = 0;
+  let c = [...cars];
+  while (on <= 4) {
     for (let i of maps) {
-      i.showOffIndex(on)
+      i.showOffIndex(on);
     }
-    for (let i=c.length-1;i>=0;i--){
-      if (c[i].elevation == on){
-        c[i].show(on)
-        c.splice(i, 1)
+    for (let i = c.length - 1; i >= 0; i --) {
+      if (c[i].elevation == on) {
+        c[i].show(on);
+        c.splice(i, 1);
       }
     }
-    on++
+    on++;
   }
 
   updateButtons();
@@ -138,27 +141,31 @@ function draw() {
         cars[i].update();
       }
       if (FRAME % 5) {
-        if (cars.length > 1) {
-          // Only create a car if we are far enough away from the last one
-          // So we don't overlap with a car and get stuck
-          if (dist(cars[cars.length - 1].pos.x, cars[cars.length - 1].pos.y, 
-                    cars[i].nodes[0].pos.x, cars[i].nodes[0].pos.y) > 100) {
-            cars.push(new Car(0, 0));
-            cars[cars.length - 1].id = cars.length - 1;
-          }
-        } else {
-          // Never made a car before
-          cars.push(new Car(0, 0));
-          cars[cars.length - 1].id = cars.length - 1;
-        }
+        // if (cars.length > 1) {
+        //   // Only create a car if we are far enough away from the last one
+        //   // So we don't overlap with a car and get stuck
+        //   if (true) {
+        //     if (dist(cars[cars.length - 1].pos.x, cars[cars.length - 1].pos.y, 
+        //              0, 0) > 100) {
+        //       cars.push(new Car(0, 0));
+        //       cars[cars.length - 1].id = cars.length - 1;
+        //     }
+        //   }
+        // } else {
+        //  // Never made a car before
+        cars.push(new Car(0, 0));
+        cars[cars.length - 1].id = cars.length - 1;
+        // }
       }
       FRAME ++;
     }
   } else {
+    // Show the elevation when drawing
     push();
-    textSize(30);
-    fill(255); 
-    text("Elevation: " + drawLayer, 100, 100);
+    textSize(12);
+    textAlign(CENTER);
+    fill(255);
+    text("Elevation: " + drawLayer, 190, 100);
     pop();
   }
 }
