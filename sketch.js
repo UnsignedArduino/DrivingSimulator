@@ -2,11 +2,10 @@ let width = 1280;
 let height = 720;
 let SCALE = 1;
 let clickAccuracy = 10;
-
 let run = false;
 let cars = [];
 let mouseHeld = false
-let map;
+//let map;
 let prevPos;
 let frameCount = 0;
 let branchMode = false;
@@ -14,12 +13,21 @@ let branchSelected = false;
 let branchNode = 0;
 let showNodePos = false;
 let FRAME = 0;
-let monke = 10;
+let monke = 5;
 let closestDistance = 1000000;
 let closestIndex = [];
 let UNINODE;
 let maps = [];
 let lastMainNode = undefined;
+let titanIterator = 0;
+let drawingMain = false;
+let onDraw = 0;
+let whatWouldHappen = "";
+let universalNodeId = 0;
+let branchNum = 0
+let drawLayer = 0
+let fpsToShow;
+
 
 function recurseAllNodes(arr, index) {
   // Get the closet node and return an array of indexes 
@@ -37,7 +45,6 @@ function recurseAllNodes(arr, index) {
 }
 
 function chooseUni(arr) {
-  UNINODE = arr[0];
   recurseAllNodes(arr);
 }
 
@@ -54,37 +61,186 @@ function testAdd() {
   UNINODE.addNextNode();
 }
 
-function setup() {
-  createCanvas(width, height);
-  maps.push(new GameMap())
-  map = new GameMap();
-  prevPos = createVector(0, 0);
+function checkIfOverlappingMap() {
+  for (let m in maps) {
+    for (let n of maps[m].nodes) {
+      if (dist(mouseX, mouseY, n.pos.x, n.pos.y) < 60) {
+        return m;
+      }
+    }
+  }
+  return -1;
 }
+
+function setup() {
+  frameRate(120)
+  //createCanvas(width, height);
+  createCanvas(window.innerWidth, window.innerHeight)
+  //maps.push(new GameMap())
+  //map = new GameMap();
+  prevPos = createVector(0, 0);
+  setInterval(() => {
+    fpsToShow = round(frameRate());
+  }, 500);
+}
+
 
 function draw() {
   background(56);
-  // I still don't get why the hell === exists in JS
+  calculateBranching();
+  updateMouseHint();
+  updateMouseStuff();
+  textSize(12);
+  push();
+  textAlign(RIGHT);
+  fill(255);
+  text("FPS: " + fpsToShow, width - 10, 15);
+  pop();
+  
+  // Draw the roads
+  let on = 0
+  let c = [...cars]
+  while (on <= 4){
+    for (let i of maps) {
+      i.showOffIndex(on)
+    }
+    for (let i=c.length-1;i>=0;i--){
+      if (c[i].elevation == on){
+        c[i].show(on)
+        c.splice(i, 1)
+      }
+    }
+    on++
+  }
+
+  
+  
+
+  // Draw a mouse hint to show what would happen
+  const tooltipHeight = 2;
+  push();
+  fill(255, 255, 255);
+  rect(mouseX - 3, mouseY - 19 - tooltipHeight,
+       textWidth(whatWouldHappen) + 6,
+       textSize() + 5 - tooltipHeight);
+  fill(0, 0, 0);
+  text(whatWouldHappen, mouseX, mouseY - 7 - tooltipHeight);
+  pop();
+
+  // Draw all the cars
+  
+
+  // Update the cars if we are running
+  if (run) {
+    for (let z = 0; z < monke; z++) {
+      for (let i = 0; i < cars.length; i ++) {
+        cars[i].nodeSteer();
+        cars[i].update();
+      }
+      if (FRAME % 5) {
+        if (cars.length > 0) {
+          // Only create a car if we are far enough away from the last one
+          // So we don't overlap with a car and get stuck
+          if (dist(cars[cars.length - 1].pos.x, cars[cars.length - 1].pos.y, 
+                    cars[i].nodes[0].pos.x, cars[i].nodes[0].pos.y) > 100) {
+            cars.push(new Car(0, 0));
+            cars[cars.length - 1].id = cars.length - 1;
+          }
+        } else {
+          // Never made a car before
+          cars.push(new Car(0, 0));
+          cars[cars.length - 1].id = cars.length - 1;
+        }
+      }
+      FRAME ++;
+    }
+  }
+  else{
+    push()
+    textSize(30)
+    fill(255)
+    text("Elevation: "+drawLayer, 100, 100)
+    pop()
+  }
+}
+
+function calculateBranching() {
   // If we never made a main node we cannot branch
   if (lastMainNode === undefined) {
-    // console.log("No main node, not branching");
     branchMode = false;
-  } else {
-    let lastNodeDistance = dist(mouseX, mouseY, lastMainNode.pos.x, lastMainNode.pos.y);
-    // console.log("Distance to last main node is " + lastNodeDistance);
-    branchMode = lastNodeDistance > 100;
-    // console.log(branchMode ? "Branching" : "Not branching");
+    return;
   }
+  // // Get the last node on the main branch
+  // let lastNodeDistance = dist(mouseX, mouseY, lastMainNode.pos.x, lastMainNode.pos.y);
+  // // Get the closest node to the cursor
+  // closestIndex = [];
+  // closestDistance = 999999999999999999999999999999;
+  // UNINODE = maps[0].nodes[0]
+  // for (let i = 0; i < maps.length; i++) {
+  //   chooseUni(maps[i].nodes);
+  // }
+  // let closestNode = UNINODE;
+  // let closestNodeDistance = dist(mouseX, mouseY, closestNode.pos.x, closestNode.pos.y);
+  // // Only branch if we are farther then 100 pixels from the last main node
+  // // And less the 100 pixels from a node
+  // branchMode = lastNodeDistance > 100 && closestNodeDistance < 100;
+}
+
+function updateMouseHint() {
+  if (dist(mouseX, mouseY, prevPos.x, prevPos.y) > clickAccuracy) {
+    if (!branchMode) {
+      // Not branching, add to main path
+      whatWouldHappen = "Continue main path";
+      let check = checkIfOverlappingMap();
+      if (!drawingMain) {
+        if (check == -1) {
+          whatWouldHappen = "Make new car spawner";
+        }
+      }
+    } else {
+      // If a branch isn't selected, then get the closest node
+      whatWouldHappen = "Continue branch";
+      if (!branchSelected) {
+        whatWouldHappen = "Create new branch";
+      }
+    }
+  }
+}
+
+function updateMouseStuff() {
   if (mouseHeld) {
     if (dist(mouseX, mouseY, prevPos.x, prevPos.y) > clickAccuracy) {
       if (!branchMode) {
         // Not branching, add to main path
-        lastMainNode = map.addNode();
+        whatWouldHappen = "Continue main path";
+        let check = checkIfOverlappingMap();
+        if (!drawingMain) {
+          branchNum++
+          if (check == -1) {
+            whatWouldHappen = "Make new car spawner";
+            maps.push(new GameMap());
+            maps[maps.length - 1].addNode();
+            onDraw = maps.length - 1;
+          } else {
+            lastMainNode = maps[check].addNode();
+            onDraw = check;
+          }
+          drawingMain = true;
+        } else {
+          lastMainNode = maps[onDraw].addNode();
+        }
       } else {
         // If a branch isn't selected, then get the closest node
+        whatWouldHappen = "Continue branch";
         if (!branchSelected) {
+          branchNum++
+          whatWouldHappen = "Create new branch";
           closestIndex = [];
           closestDistance = 999999999999999999999999999999;
-          chooseUni(map.nodes);
+          UNINODE = maps[0].nodes[0]
+          for (let i = 0; i < maps.length; i++) {
+            chooseUni(maps[i].nodes)
+          }
         }
         branchSelected = true;
         testAdd();
@@ -92,40 +248,8 @@ function draw() {
       prevPos = createVector(mouseX, mouseY);
     }
   } else {
+    drawingMain = false;
     branchSelected = false;
-  }
-
-  // Draw the roads
-  map.show();
-  push();
-  fill(branchMode ? 255 : 0, 0, 0);
-  text(branchMode ? "Branching" : "Not branching", 50, 50);
-  pop();
-  for (let i = 0; i < cars.length; i ++) {
-    cars[i].show();
-  }
-
-  // Update the cars if we are running
-  for (let z = 0; z < monke; z++) {
-    if (run) {
-      map.update();
-      for (let i = 0; i < cars.length; i ++) {
-        cars[i].nodeSteer();
-        cars[i].update();
-      }
-      if (FRAME % 5) {
-        if (cars.length > 0){
-          if (dist(cars[cars.length-1].pos.x, cars[cars.length-1].pos.y, map.nodes[0].pos.x, map.nodes[0].pos.y) > 100){
-            cars.push(new Car(map.nodes[0].pos.x, map.nodes[0].pos.y));
-            cars[cars.length - 1].id = cars.length - 1;
-          }
-        } else {
-          cars.push(new Car(map.nodes[0].pos.x, map.nodes[0].pos.y));
-          cars[cars.length - 1].id = cars.length - 1;
-        }
-      }
-      FRAME ++;
-    }
   }
 }
 
@@ -135,6 +259,7 @@ function mousePressed() {
 
 function mouseReleased() {
   mouseHeld = false;
+  
 }
 
 function keyPressed() {
@@ -149,5 +274,17 @@ function keyPressed() {
   // N
   if (keyCode == 78) {
     showNodePos = !showNodePos;
+  }
+  // Up arrow
+  if (keyCode == 38) {
+    if (drawLayer < 4) {
+      drawLayer ++;
+    }
+  }
+  // Down arrow
+  if (keyCode == 40) {
+    if (drawLayer > 0) {
+      drawLayer --;
+    }
   }
 }

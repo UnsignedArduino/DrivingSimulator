@@ -2,6 +2,7 @@ class GameMap {
   constructor() {
     this.createMap();
     this.nodes = [];
+    this.layer = drawLayer
   }
 
   createMap() {
@@ -21,6 +22,10 @@ class GameMap {
 
   addNode() {
     let node = new Node(mouseX, mouseY);
+    for (let i = 0; i < this.nodes.length; i ++) {
+      this.nodes[i].isFinal = false;
+    }
+    node.isFinal = true;
     this.nodes.push(node);
     return node;
   }
@@ -29,29 +34,52 @@ class GameMap {
 
   }
 
-  showAllSubs(arr) {
+  showAllSubsBottom(arr) {
     if (arr.length > 0){
       for (let i = 0; i < arr.length; i++) {
         if (arr[i].nextNodes.length > 0) {
-          arr[i].show();
-          this.showAllSubs(arr[i].nextNodes);
+          arr[i].showBottom();
+          this.showAllSubsBottom(arr[i].nextNodes);
+        }
+      }
+    }
+  }
+  showAllSubsTop(arr) {
+    if (arr.length > 0){
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].nextNodes.length > 0) {
+          arr[i].showTop();
+          this.showAllSubsTop(arr[i].nextNodes);
         }
       }
     }
   }
 
-  show() {
-    // Show everything
-    this.showAllSubs(this.nodes);
-    for (let n = 0; n < this.nodes.length - 1; n ++) {
-      // Draw roads
-      push();
-      stroke(200, 200, 200);
-      strokeWeight(60);
-      line(this.nodes[n].pos.x, this.nodes[n].pos.y, 
-           this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
-      pop();
+  showAllSubsOffIndex(arr, index) {
+    if (arr.length > 0){
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].nextNodes.length > 0) {
+          arr[i].show(index);
+          this.showAllSubsOffIndex(arr[i].nextNodes, index);
+        }
+      }
     }
+  }
+
+  showBottom() {
+    // Show everything
+    this.showAllSubsBottom(this.nodes);
+    for (let n = 0; n < this.nodes.length - 1; n ++) {
+      if (this.nodes[n].layer == 0){      
+        push();
+        stroke(map(this.nodes[n].layer, 0, 2, 100, 255));
+        strokeWeight(40);
+        line(this.nodes[n].pos.x, this.nodes[n].pos.y, 
+            this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
+        pop();
+      }
+    }
+    
     if (showNodePos) {
       push();
       fill(255, 0, 0);
@@ -62,6 +90,59 @@ class GameMap {
       pop();
     }
   }
+
+  showTop() {
+    // Show everything
+    this.showAllSubsTop(this.nodes);
+    for (let n = 0; n < this.nodes.length - 1; n ++) {
+      if (this.nodes[n].layer == 1){      
+        push();
+        stroke(map(this.nodes[n].layer, 0, 2, 100, 255));
+        strokeWeight(40);
+        line(this.nodes[n].pos.x, this.nodes[n].pos.y, 
+            this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
+        pop();
+      }
+      
+    }
+    
+    if (showNodePos) {
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nodes.length; n ++) {
+        circle(this.nodes[n].pos.x, this.nodes[n].pos.y, 5)
+      } 
+      pop();
+    }
+  }
+
+  showOffIndex(index) {
+    // Show everything
+    this.showAllSubsOffIndex(this.nodes, index);
+    for (let n = 0; n < this.nodes.length - 1; n ++) {
+      if (this.nodes[n].layer == index){      
+        push();
+        stroke(map(this.nodes[n].layer, 0, 4, 100, 255));
+        strokeWeight(40);
+        line(this.nodes[n].pos.x, this.nodes[n].pos.y, 
+            this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
+        pop();
+      }
+      
+    }
+    
+    if (showNodePos) {
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nodes.length; n ++) {
+        circle(this.nodes[n].pos.x, this.nodes[n].pos.y, 5)
+      } 
+      pop();
+    }
+  }
+  
 }
 
 class Node {
@@ -69,27 +150,89 @@ class Node {
     this.pos = createVector(x, y);
     // It's a list so we can branch
     this.nextNodes = [];
+    this.id = universalNodeId;
+    this.isFinal = false
+    this.branchNumber = branchNum
+    this.layer = drawLayer;
+    universalNodeId ++;
   }
 
   addNextNode() {
     this.nextNodes.push(new Node(mouseX, mouseY));
     if (this.nextNodes.length == 1) {
-      this.nextNodes[0].pos = this.pos.copy()
+      this.nextNodes[0].pos = this.pos.copy();
     }
+    for (let i = 0; i < this.nextNodes.length; i ++) {
+      this.nextNodes[i].isFinal = false
+    }
+    this.nextNodes[this.nextNodes.length-1].isFinal = true;    
   }
 
   update() {
 
   }
 
-  show() {
+  showBottom() {
     // Draw a line from this node to every next node
     push();
-    stroke(200, 200, 200);
-    strokeWeight(60);
+    
+    strokeWeight(40);
     for (let i = 1; i < this.nextNodes.length; i++) {
-      line(this.nextNodes[i].pos.x, this.nextNodes[i].pos.y, 
-           this.nextNodes[i-1].pos.x, this.nextNodes[i-1].pos.y);
+      stroke(map(this.nextNodes[i].layer, 0, 2, 100, 255));
+      if (this.nextNodes[i].layer == 0){
+        line(this.nextNodes[i].pos.x, this.nextNodes[i].pos.y, 
+            this.nextNodes[i-1].pos.x, this.nextNodes[i-1].pos.y);
+      }
+    }
+    pop();
+
+    if (showNodePos) {
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nextNodes.length; n ++) {
+        circle(this.nextNodes[n].pos.x, this.nextNodes[n].pos.y, 5)
+      } 
+      pop();
+    }
+  }
+
+  showTop() {
+    // Draw a line from this node to every next node
+    push();
+    stroke(map(this.layer, 0, 2, 100, 255));
+    strokeWeight(40);
+    for (let i = 1; i < this.nextNodes.length; i++) {
+      stroke(map(this.nextNodes[i].layer, 0, 4, 100, 255));
+      if (this.nextNodes[i].layer == 1) {
+        line(this.nextNodes[i].pos.x, this.nextNodes[i].pos.y, 
+            this.nextNodes[i-1].pos.x, this.nextNodes[i-1].pos.y);
+      }
+    }
+    pop();
+
+    if (showNodePos) {
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      for (let n = 0; n < this.nextNodes.length; n ++) {
+        circle(this.nextNodes[n].pos.x, this.nextNodes[n].pos.y, 5)
+      } 
+      pop();
+    }
+  }
+  
+  show(index) {
+    // Draw a line from this node to every next node
+    push();
+    stroke(map(this.layer, 0, 2, 100, 255));
+    strokeWeight(40);
+    for (let i = 1; i < this.nextNodes.length; i++) {
+      if (this.nextNodes[i].layer == index){
+      stroke(map(this.nextNodes[i].layer, 0, 4, 100, 255));
+        line(this.nextNodes[i].pos.x, this.nextNodes[i].pos.y, 
+            this.nextNodes[i-1].pos.x, this.nextNodes[i-1].pos.y);
+      }
     }
     pop();
 
@@ -119,6 +262,8 @@ class StartPosition {
     let previousNode = this.nodes[this.nodes.length - 1];
     previousNode.addNextNode(node);
     this.nodes.push(node);
+    
+    
   }
 
   update() {

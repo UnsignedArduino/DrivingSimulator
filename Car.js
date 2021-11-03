@@ -14,12 +14,26 @@ class Car {
     this.edgeLines = [];
     this.isSlowing = false;
     this.goPass = false;
-    this.nodes = [...map.nodes];
+    let r = titanIterator
+    this.closestDistance = 9999999
+    this.nodes = [...maps[r].nodes];
+    this.powerArr = []
+    this.uni = null
+    this.pos = createVector(this.nodes[0].pos.x, this.nodes[0].pos.y)
+    this.elevation = 0
     // Nice random color that doesn't involve red (so we can see taillights)
     this.COLOR = color(0, random(0, 255), random(0, 255));
+
+    titanIterator++
+    if (titanIterator > maps.length-1){
+      titanIterator = 0
+    }
   }
 
-  show() {
+  show(index) {
+    if (this.elevation != index){
+      return
+    }
     // Draw the car to the screen
     push();
     translate(this.pos.x / SCALE, this.pos.y / SCALE);
@@ -104,7 +118,7 @@ class Car {
     this.isSlowing = false;
     for (let car of cars) {
       // Skip if it's own self
-      if (car.id == this.id) {
+      if (car.id == this.id || car.elevation != this.elevation) {
         continue;
       }
       // Iterate through every "edge line"
@@ -113,11 +127,11 @@ class Car {
           if (collideLineLine(l2[0].x, l2[0].y, l2[1].x, l2[1].y,
                               l[0].x, l[0].y, l[1].x, l[1].y)) {
               // Destroy this car with we overlap
-              // cars.splice(this.id, 1);
-              // Shift all the IDs down
-              // for (let i = 0; i < cars.length; i ++) {
-              //   cars[i].id = i;
-              // }
+              cars.splice(this.id, 1);
+              //Shift all the IDs down
+              for (let i = 0; i < cars.length; i ++) {
+                cars[i].id = i;
+              }
               break;
           }
         }
@@ -168,10 +182,42 @@ class Car {
     let target = createVector(x, y);
     this.desiredDirection = new p5.Vector.sub(target, this.pos);
   }
+  recurseAll(arr) {
+    
+    if (arr.length > 0) {
+      
+      for (let i = 0; i < arr.length; i++) {
+        let d = dist(this.nodes[this.nodeOn].pos.x, this.nodes[this.nodeOn].pos.y, arr[i].pos.x, arr[i].pos.y);
+        if (d < this.closestDistance && this.nodes[this.nodeOn].branchNumber != arr[i].branchNumber && d<50) {
+          this.closestDistance = d;
+          this.uni = i
+          this.powerArr = arr
+          
+        }
+        this.recurseAll(arr[i].nextNodes);
+      }
+    }
+  }
+  checkIfOverlap() {
+    this.uni = -1;
+    this.closestDistance = 99999;
+    for (let m of maps) {
+      this.recurseAll(m.nodes);
+    }
+    if (this.uni != -1) {
+      this.nodes = [...this.powerArr];
+      this.nodeOn = this.uni;
+    }
+  }
 
   nodeSteer() {
     // Drive to all the nodes
+    if (this.nodes[this.nodeOn].isFinal) {
+      this.checkIfOverlap();
+    }
+
     let nextNode = this.nodes[this.nodeOn];
+    this.elevation = nextNode.layer
     let onPos = createVector(nextNode.pos.x, nextNode.pos.y);
     this.setDirection(onPos.x, onPos.y);
     if (dist(this.pos.x, this.pos.y, onPos.x, onPos.y) < 5) {
