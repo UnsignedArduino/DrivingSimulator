@@ -13,7 +13,7 @@ let branchSelected = false;
 let branchNode = 0;
 let showNodePos = false;
 let FRAME = 0;
-let monke = 5;
+let monke = 1;
 let closestDistance = 1000000;
 let closestIndex = [];
 let UNINODE;
@@ -99,7 +99,7 @@ function draw() {
   textSize(12);
   textAlign(RIGHT);
   fill(255);
-  text("FPS: " + fpsToShow, width - 10, 15);
+  text("FPS: " + fpsToShow, width - 10, 20);
   pop();
   
   // Draw the roads
@@ -165,7 +165,7 @@ function draw() {
     textSize(12);
     textAlign(CENTER);
     fill(255);
-    text("Elevation: " + drawLayer, 190, 100);
+    text("Elevation: " + drawLayer, 190, 140);
     pop();
   }
 }
@@ -272,13 +272,28 @@ function mousePressed() {
 
 function mouseReleased() {
   mouseHeld = false;
-  
+}
+
+function changeSpeed() {
+  if (monke == 1) {
+    monke = 5;
+  } else if (monke == 5) {
+    monke = 10;
+  } else {
+    monke = 1;
+  }
 }
 
 function keyPressed() {
   // Space
   if (keyCode == 32) {
     run = !run;
+  }
+  // F
+  if (keyCode == 70) {
+    if (run) {
+      changeSpeed();
+    }
   }
   // S
   if (keyCode == 83) {

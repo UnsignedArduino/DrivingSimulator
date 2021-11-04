@@ -120,6 +120,13 @@ class GameMap {
   showOffIndex(index) {
     // Show everything
     this.showAllSubsOffIndex(this.nodes, index);
+    if (this.nodes[0].layer == index){
+      push()
+      noStroke()
+      fill(map(this.nodes[0].layer, 0, 4, 100, 255))
+      circle(this.nodes[0].pos.x, this.nodes[0].pos.y, 40)
+      pop()
+    }
     for (let n = 0; n < this.nodes.length - 1; n ++) {
       if (this.nodes[n].layer == index){      
         push();

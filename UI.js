@@ -4,6 +4,8 @@ const hoverColor = "#61C2FF";
 const disabledColor = "#828282"
 
 let runButton;
+let fastForwardButton;
+
 let branchButton;
 let upElevationButton;
 let downElevationButton;
@@ -77,7 +79,7 @@ function makeCheckButton(x, y, width, height, text, isEnabledFunc, isSelectedFun
 function makeButtons() {
   runButton = makeCheckButton(10, 10, 100, 30, "Run (space)", 
     () => {  // Enabled
-      return true;
+      return maps.length > 0;
     }, 
     () => {  // Selected
       return run;
@@ -86,9 +88,16 @@ function makeButtons() {
       run = !run;
     }
   )
-  branchButton = makeCheckButton(10, 50, 100, 30, "Branch mode (s)",
+  fastForwardButton = makeCommandButton(10, 50, 100, 30, "Speed x1 (f)", 
     () => {
-      return !run;
+      return run;
+    }, 
+    changeSpeed
+  )
+
+  branchButton = makeCheckButton(120, 10, 150, 30, "Branch mode (s)",
+    () => {
+      return !run && maps.length > 0;
     },
     () => {
       return branchMode;
@@ -97,7 +106,7 @@ function makeButtons() {
       branchMode = !branchMode;
     }
   )
-  upElevationButton = makeCommandButton(120, 10, 150, 30, "Increase elevation (↑)", 
+  upElevationButton = makeCommandButton(120, 50, 150, 30, "Increase elevation (↑)", 
     () => {
       return !run && drawLayer < 4;
     }, 
@@ -107,7 +116,7 @@ function makeButtons() {
       }
     }
   )
-  downElevationButton = makeCommandButton(120, 50, 150, 30, "Decrease elevation (↓)", 
+  downElevationButton = makeCommandButton(120, 90, 150, 30, "Decrease elevation (↓)", 
     () => {
       return !run && drawLayer > 0;
     }, 
@@ -117,6 +126,7 @@ function makeButtons() {
       }
     }
   )
+
 }
 
 function overlappingButtons() {
@@ -129,6 +139,7 @@ function overlappingButtons() {
 }
 
 function updateButtons() {
+  fastForwardButton.text = "Speed x" + monke + " (f)";
   for (let btn of allButtons) {
     btn.draw();
   }

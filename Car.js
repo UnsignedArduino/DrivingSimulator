@@ -9,7 +9,7 @@ class Car {
     this.steerStrength = 1;
     this.nodeOn = 0;
     this.id = -1;
-    this.raycastDistance = 200;
+    this.raycastDistance = 150;
     this.rayPoints = [];
     this.edgeLines = [];
     this.isSlowing = false;
