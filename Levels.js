@@ -1,4 +1,7 @@
 
 
 
-function Level1
+function levelOne(){
+  maps = []
+  
+}

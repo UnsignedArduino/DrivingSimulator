@@ -315,4 +315,8 @@ function keyPressed() {
       drawLayer --;
     }
   }
+
+  if (keyCode == 76){
+    levelOne()
+  }
 }

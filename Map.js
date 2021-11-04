@@ -1,3 +1,18 @@
+function drawArrow(base, vec, myColor) {
+  push();
+  stroke(myColor);
+  strokeWeight(3);
+  fill(myColor);
+  translate(base.x, base.y);
+  line(0, 0, vec.x, vec.y);
+  rotate(vec.heading());
+  let arrowSize = 7;
+  translate(vec.mag() - arrowSize, 0);
+  triangle(0, arrowSize / 2, 0, -arrowSize / 2, arrowSize, 0);
+  pop();
+}
+
+
 class GameMap {
   constructor() {
     this.createMap();
@@ -5,7 +20,9 @@ class GameMap {
     this.layer = drawLayer
   }
 
-  createMap() {
+  createMap(
+    
+  ) {
     // Create the map
     this.starts = [];
     this.ends = [];
@@ -135,6 +152,7 @@ class GameMap {
         line(this.nodes[n].pos.x, this.nodes[n].pos.y, 
             this.nodes[n + 1].pos.x, this.nodes[n + 1].pos.y);
         pop();
+        
       }
       
     }
@@ -145,6 +163,13 @@ class GameMap {
       noStroke();
       for (let n = 0; n < this.nodes.length; n ++) {
         circle(this.nodes[n].pos.x, this.nodes[n].pos.y, 5)
+        if (n % 10 == 0 && n<this.nodes.length-2) {
+          let p = this.nodes[n].pos.copy();
+          let m = this.nodes[n + 1].pos.copy();
+          let v = p5.Vector.sub(m, p);
+          v.setMag(5);
+          drawArrow(p, v, "blue")
+        }
       } 
       pop();
     }
