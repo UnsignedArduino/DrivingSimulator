@@ -127,11 +127,11 @@ class Car {
                               l[0].x, l[0].y, l[1].x, l[1].y)) {
               // Destroy this car with we overlap
               cars.splice(this.id, 1);
-              //Shift all the IDs down
+              // Shift all the IDs down
               for (let i = 0; i < cars.length; i ++) {
                 cars[i].id = i;
               }
-              break;
+              return;
           }
         }
         // Do some math
@@ -165,7 +165,10 @@ class Car {
         }
       }
     }
+    let posBefore = this.pos.copy();
     this.pos.add(this.vel);
+    let posAfter = this.pos.copy();
+    pixelsTraveled += dist(posBefore.x, posBefore.y, posAfter.x, posAfter.y);
     this.angle = Math.atan2(this.vel.y, this.vel.x);
     this.goPass = false;
   }
@@ -231,7 +234,13 @@ class Car {
       } else {
         // Destroy if at end of path
         this.nodeOn = 0;
-        cars.splice(this.id, 1)
+        for (let goal of goals) {
+          if (dist(goal.x, goal.y, this.pos.x, this.pos.y)<40){
+            trafficFlow ++;
+            break;
+          }
+        }
+        cars.splice(this.id, 1);
         // Shift IDs down
         for (let i = 0; i < cars.length; i ++) {
           cars[i].id = i;

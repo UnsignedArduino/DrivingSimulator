@@ -46,6 +46,25 @@ class GameMap {
     this.nodes.push(node);
     return node;
   }
+  addNodeAtPos(x, y) {
+    let node = new Node(x, y);
+    for (let i = 0; i < this.nodes.length; i ++) {
+      this.nodes[i].isFinal = false;
+    }
+    node.isFinal = true;
+    this.nodes.push(node);
+  }
+  returnAllNodes(arr, all){
+    if (all == null || all == undefined){
+      all = []
+    }
+    if (arr.length > 0){
+      for (let a of arr){
+        all.push(a);
+        this.returnAllNodes(a.nextNodes, all)
+      }
+    }
+  }
 
   update() {
 
@@ -81,6 +100,32 @@ class GameMap {
         }
       }
     }
+  }
+
+  checkIfSatisfiedGoals(){
+    let all = []
+    this.returnAllNodes(this.nodes, all)
+    let check = false
+    let gotHowMany = 0
+    let collected = []
+    for (let a of all){
+      for (let g in goals){
+        let canCheck = true
+        for (let c of collected){
+          if (c == g){
+            canCheck = false
+          }
+        }
+        if (dist(goals[g].x, goals[g].y, a.pos.x, a.pos.y) < 40 && canCheck){
+          gotHowMany++
+          collected.push(g)
+        }
+      }
+      if (gotHowMany >= goals.length){
+        check = true
+      }
+    }
+    return check;
   }
 
   showBottom() {
@@ -154,7 +199,6 @@ class GameMap {
         pop();
         
       }
-      
     }
     
     if (showNodePos) {

@@ -4,7 +4,13 @@ let SCALE = 1;
 let clickAccuracy = 10;
 let run = false;
 let cars = [];
+let goals = []
 let mouseHeld = false
+let trafficFlow = 0;
+let framesRan = 0;
+let pixelsTraveled = 0;
+let averageSpeed = 0;
+let lastSpeed = 0;
 //let map;
 let prevPos;
 let frameCount = 0;
@@ -24,9 +30,11 @@ let drawingMain = false;
 let onDraw = 0;
 let whatWouldHappen = "";
 let universalNodeId = 0;
-let branchNum = 0
-let drawLayer = 0
+let branchNum = 0;
+let drawLayer = 0;
 let fpsToShow;
+let maxfs = 100000;
+// let maxfs = 1000;
 
 
 function recurseAllNodes(arr, index) {
@@ -85,6 +93,9 @@ function setup() {
   setInterval(() => {
     fpsToShow = round(frameRate());
   }, 500);
+  setInterval(() => {
+    lastSpeed = averageSpeed;
+  }, 500);
 }
 
 
@@ -94,12 +105,26 @@ function draw() {
   updateMouseHint();
   updateMouseStuff();
   
+  
   // Draw FPS
   push();
   textSize(12);
   textAlign(RIGHT);
   fill(255);
   text("FPS: " + fpsToShow, width - 10, 20);
+  pop();
+
+  // Show more stats
+  push();
+  textSize(30);
+  textAlign(LEFT);
+  fill(255);
+  text("Frame: " + framesRan + "/" + maxfs, 300, 35);
+  text("Traffic flow: " + trafficFlow, 300, 65);
+  pixelsTraveled /= cars.length;
+  averageSpeed = round(pixelsTraveled * frameRate() / monke);
+  pixelsTraveled = 0;
+  text("Average speed: " + lastSpeed + " px/sec", 300, 95);
   pop();
   
   // Draw the roads
@@ -135,10 +160,15 @@ function draw() {
 
   // Update the cars if we are running
   if (run) {
+    if (framesRan > maxfs) {
+      run = false;
+      cars = [];
+    }
     for (let z = 0; z < monke; z++) {
       for (let i = 0; i < cars.length; i ++) {
         cars[i].nodeSteer();
         cars[i].update();
+        framesRan ++;
       }
       if (FRAME % 5) {
         // if (cars.length > 1) {
@@ -168,6 +198,13 @@ function draw() {
     text("Elevation: " + drawLayer, 190, 140);
     pop();
   }
+
+  push()
+  fill(255, 0, 0)
+  for (let pos of goals) {
+    circle(pos.x, pos.y, 30)
+  }
+  pop()
 }
 
 function calculateBranching() {
@@ -193,7 +230,7 @@ function calculateBranching() {
 }
 
 function updateMouseHint() {
-  if (overlappingButtons()) {
+  if (overlappingButtons() || run) {
     whatWouldHappen = "";
     return;
   }
@@ -218,7 +255,7 @@ function updateMouseHint() {
 }
 
 function updateMouseStuff() {
-  if (overlappingButtons()) {
+  if (overlappingButtons() || run) {
     return;
   }
   if (mouseHeld) {
@@ -279,15 +316,45 @@ function changeSpeed() {
     monke = 5;
   } else if (monke == 5) {
     monke = 10;
+  } else if (monke == 10) {
+    monke = 20;
+  } else if (monke == 20) {
+    monke = 50;
   } else {
     monke = 1;
   }
 }
 
+function toggleRun() {
+  run = !run;
+  if (run) {
+    if (!checkIfRoadsMeetGoals()) {
+      run = false;
+      return;
+    }
+    framesRan = 0;
+    trafficFlow = 0;
+    averageSpeed = 0;
+    pixelsTraveled = 0;
+    lastSpeed = 0;
+  }
+}
+
+function checkIfRoadsMeetGoals() {
+  let allGood = true
+  return allGood;
+  for (let m of maps){
+    if (!m.checkIfSatisfiedGoals()) {
+      //allGood = false
+    }
+  }
+  return allGood;
+}
+
 function keyPressed() {
   // Space
   if (keyCode == 32) {
-    run = !run;
+    toggleRun();
   }
   // F
   if (keyCode == 70) {
@@ -315,8 +382,8 @@ function keyPressed() {
       drawLayer --;
     }
   }
-
-  if (keyCode == 76){
-    levelOne()
+  // L
+  if (keyCode == 76) {
+    hardLevel();
   }
 }

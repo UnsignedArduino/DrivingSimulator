@@ -79,14 +79,12 @@ function makeCheckButton(x, y, width, height, text, isEnabledFunc, isSelectedFun
 function makeButtons() {
   runButton = makeCheckButton(10, 10, 100, 30, "Run (space)", 
     () => {  // Enabled
-      return maps.length > 0;
+      return maps.length > 0 && checkIfRoadsMeetGoals();
     }, 
     () => {  // Selected
       return run;
     },
-    () => {  // On press
-      run = !run;
-    }
+    toggleRun
   )
   fastForwardButton = makeCommandButton(10, 50, 100, 30, "Speed x1 (f)", 
     () => {
