@@ -5,6 +5,7 @@ const disabledColor = "#828282"
 
 let runButton;
 let fastForwardButton;
+let clearMapButton;
 
 let branchButton;
 let upElevationButton;
@@ -91,6 +92,12 @@ function makeButtons() {
       return run;
     }, 
     changeSpeed
+  )
+  clearMapButton = makeCommandButton(10, 90, 100, 30, "Clear map", 
+    () => {
+      return !run && maps.length > 0;
+    },
+    clearMap
   )
 
   branchButton = makeCheckButton(120, 10, 150, 30, "Branch mode (s)",

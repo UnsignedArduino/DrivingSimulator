@@ -1,9 +1,12 @@
+let level = 0;
+let levels = [levelZero, levelOne, levelTwo, hardLevel];
+
 function runLevel(l) {
-  let levels = [levelZero, levelOne, levelTwo];
   if (l < 0 || l >= levels.length) {
     return;
   }
   levels[l]();
+  level = l;
 }
 
 function levelZero() {

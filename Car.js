@@ -9,7 +9,7 @@ class Car {
     this.steerStrength = 1;
     this.nodeOn = 0;
     this.id = -1;
-    this.raycastDistance = 150;
+    this.raycastDistance = 120;
     this.rayPoints = [];
     this.edgeLines = [];
     this.isSlowing = false;
@@ -21,6 +21,7 @@ class Car {
     this.uni = null;
     this.pos = createVector(this.nodes[0].pos.x, this.nodes[0].pos.y);
     this.elevation = 0;
+
     // Nice random color that doesn't involve red (so we can see taillights)
     this.COLOR = color(0, random(0, 255), random(0, 255));
     titanIterator++
@@ -46,13 +47,15 @@ class Car {
     circle(-this.size.x / 2.5, -this.size.y / 2.5, 5);
     circle(-this.size.x / 2.5, this.size.y / 2.5, 5);
     pop();
-    // Draw the rays
-    // push();
-    // stroke(0);
-    // for (let l of this.rayPoints) {
-    //   line(l[0], l[1], l[2], l[3]);
-    // }
-    // pop()
+    //Draw the rays
+    if (showNodePos){
+      push();
+      stroke(0, 0, 0, 100);
+      for (let l of this.rayPoints) {
+        line(l[0], l[1], l[2], l[3]);
+      }
+      pop()
+    }
   }
 
   calcRotation(x, y, offx, offy, angle) {
@@ -115,11 +118,16 @@ class Car {
     this.vel.setMag(constrain(this.vel.mag(), 0, this.maxSpeed));
     // Check if there is car in front and slow down if there is
     this.isSlowing = false;
+    let tempNodes = [...this.nodes]
+    tempNodes.splice(0, this.nodeOn-10)
+    tempNodes.splice(this.nodeOn+10, tempNodes.length-1)
     for (let car of cars) {
       // Skip if it's own self
+      
       if (car.id == this.id || car.elevation != this.elevation) {
         continue;
       }
+      
       // Iterate through every "edge line"
       for (let l of car.edgeLines) {
         for (let l2 of this.edgeLines) {
@@ -210,8 +218,28 @@ class Car {
       this.nodes = [...this.powerArr];
       this.nodeOn = this.uni;
     }
+    
+  }
+  getClosestBranch() {
+    for (let node in this.nodes) {
+      if (this.nodes[node].nextNodes.length > 0) {
+        return node;
+      }
+    }
+    return -1;
   }
 
+  checkIfAnyTouch(arr) {
+    for (let node in this.nodes) {
+      for (let node2 of arr) {
+        if (dist(this.nodes[node].pos.x, this.nodes[node].pos.y, node2.pos.x, node2.pos.y) < 60) {
+          return node;
+        }
+      }
+    }
+    return false;
+  }
+  
   nodeSteer() {
     // Drive to all the nodes
     if (this.nodes[this.nodeOn].isFinal) {
@@ -234,10 +262,14 @@ class Car {
       } else {
         // Destroy if at end of path
         this.nodeOn = 0;
-        for (let goal of goals) {
-          if (dist(goal.x, goal.y, this.pos.x, this.pos.y)<40){
-            trafficFlow ++;
-            break;
+        if (level == 0) {
+          trafficFlow ++;
+        } else {
+          for (let goal of goals) {
+            if (dist(goal.x, goal.y, this.pos.x, this.pos.y) < 40) {
+              trafficFlow ++;
+              break;
+            }
           }
         }
         cars.splice(this.id, 1);

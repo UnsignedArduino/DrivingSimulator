@@ -44,6 +44,7 @@ class GameMap {
     }
     node.isFinal = true;
     this.nodes.push(node);
+    
     return node;
   }
   addNodeAtPos(x, y) {

@@ -52,6 +52,26 @@ function recurseAllNodes(arr, index) {
   }
 }
 
+function returnAllNodes(arr, all) {
+  if (all == null || all == undefined) {
+    all = [];
+  }
+  if (arr.length > 0) {
+    for (let a of arr) {
+      all.push(a);
+      returnAllNodes(a.nextNodes, all);
+    }
+  }
+}
+
+function returnAllNodesEver() {
+  let all = [];
+  for (let m of maps) {
+    returnAllNodes(m.nodes, all);
+  }
+  return all;
+}
+
 function chooseUni(arr) {
   recurseAllNodes(arr);
 }
@@ -59,7 +79,7 @@ function chooseUni(arr) {
 function closeAndAdd(arr) {
   console.log(closestIndex);
   let node = arr[closestIndex[0]];
-  for (let i = 1; i < closestIndex.length; i++) {
+  for (let i = 1; i < closestIndex.length; i ++) {
     node = node.nextNodes[closestIndex[i]];
   }
   node.addNextNode();
@@ -105,7 +125,6 @@ function draw() {
   updateMouseHint();
   updateMouseStuff();
   
-  
   // Draw FPS
   push();
   textSize(12);
@@ -114,19 +133,20 @@ function draw() {
   text("FPS: " + fpsToShow, width - 10, 20);
   pop();
 
-  // Show more stats
-  push();
-  textSize(30);
-  textAlign(LEFT);
-  fill(255);
-  text("Frame: " + framesRan + "/" + maxfs, 300, 35);
-  text("Traffic flow: " + trafficFlow, 300, 65);
-  pixelsTraveled /= cars.length;
-  averageSpeed = round(pixelsTraveled * frameRate() / monke);
-  pixelsTraveled = 0;
-  text("Average speed: " + lastSpeed + " px/sec", 300, 95);
-  pop();
-  
+  if (run) {
+    // Show more stats
+    push();
+    textAlign(LEFT);
+    fill(255);
+    text("Frame: " + framesRan + (level == 0 ? "" : "/" + maxfs), 280, 20);
+    text("Traffic flow: " + trafficFlow, 280, 35);
+    pixelsTraveled /= cars.length;
+    averageSpeed = round(pixelsTraveled * frameRate() / monke);
+    pixelsTraveled = 0;
+    text("Average speed: " + lastSpeed + " px/sec", 280, 50);
+    pop();
+  }
+
   // Draw the roads
   let on = 0;
   let c = [...cars];
@@ -160,7 +180,7 @@ function draw() {
 
   // Update the cars if we are running
   if (run) {
-    if (framesRan > maxfs) {
+    if (framesRan > maxfs && level != 0) {
       run = false;
       cars = [];
     }
@@ -325,6 +345,19 @@ function changeSpeed() {
   }
 }
 
+function clearMap() {
+  maps.splice(0, maps.length);
+  cars.splice(0, cars.length);
+  goals.splice(0, goals.length);
+  closestIndex.splice(0, closestIndex.length);
+  UNINODE = null;
+  lastMainNode = undefined;
+  titanIterator = 0;
+  universalNodeId = 0;
+  branchNum = 0;
+  drawLayer = 0;
+}
+
 function toggleRun() {
   run = !run;
   if (run) {
@@ -383,7 +416,7 @@ function keyPressed() {
     }
   }
   // L
-  if (keyCode == 76) {
-    hardLevel();
+  if (keyCode == 76 && !run) {
+    runLevel(3);
   }
 }
