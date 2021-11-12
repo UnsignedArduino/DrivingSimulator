@@ -358,6 +358,63 @@ function clearMap() {
   drawLayer = 0;
 }
 
+function generateExportNode(node) {
+  let nextExportNodes = [];
+  for (let nextExport of node.nextNodes) {
+    nextExportNodes.push(generateExportNode(nextExport));
+  }
+  return {
+    x: node.pos.x,
+    y: node.pos.y,
+    nextNodes: nextExportNodes,
+    id: node.id,
+    isFinal: node.isFinal,
+    branchNumber: node.branchNumber,
+    layer: node.layer
+  };
+}
+
+function exportMap() {
+  let exportMaps = [];
+  for (let map of maps) {
+    let exportNodes = [];
+    for (let node of map.nodes) {
+      exportNodes.push(generateExportNode(node));
+    }
+    let exportMap = {nodes: exportNodes};
+    exportMaps.push(exportMap);
+  }
+  let exportObj = {maps: exportMaps};
+  return JSON.stringify(exportObj);
+}
+
+function generateImportNode(node) {
+  let nextImportNodes = [];
+  for (let nextImport of node["nextNodes"]) {
+    nextImportNodes.push(generateImportNode(nextImport));
+  }
+  let realNode = new Node(node["x"], node["y"]);
+  realNode.nextNodes = nextImportNodes;
+  realNode.id = node["id"];
+  realNode.isFinal = node["isFinal"];
+  realNode.branchNumber = node["branchNumber"];
+  realNode.layer = node["layer"];
+  return realNode;
+}
+
+function importMap(jsonStuff) {
+  let importObj = JSON.parse(jsonStuff);
+  clearMap();
+  for (let importMap of importObj["maps"]) {
+    let map = new GameMap();
+    map.nodes = [];
+    for (let importNode of importMap["nodes"]) {
+      map.nodes.push(generateImportNode(importNode));
+    }
+    maps.push(map);
+  }
+}
+
 function toggleRun() {
   run = !run;
   if (run) {

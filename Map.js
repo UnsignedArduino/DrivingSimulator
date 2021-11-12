@@ -20,9 +20,7 @@ class GameMap {
     this.layer = drawLayer
   }
 
-  createMap(
-    
-  ) {
+  createMap() {
     // Create the map
     this.starts = [];
     this.ends = [];
@@ -47,6 +45,7 @@ class GameMap {
     
     return node;
   }
+
   addNodeAtPos(x, y) {
     let node = new Node(x, y);
     for (let i = 0; i < this.nodes.length; i ++) {
@@ -55,6 +54,7 @@ class GameMap {
     node.isFinal = true;
     this.nodes.push(node);
   }
+  
   returnAllNodes(arr, all){
     if (all == null || all == undefined){
       all = []
@@ -81,6 +81,7 @@ class GameMap {
       }
     }
   }
+
   showAllSubsTop(arr) {
     if (arr.length > 0){
       for (let i = 0; i < arr.length; i++) {
@@ -103,7 +104,7 @@ class GameMap {
     }
   }
 
-  checkIfSatisfiedGoals(){
+  checkIfSatisfiedGoals() {
     let all = []
     this.returnAllNodes(this.nodes, all)
     let check = false
@@ -219,7 +220,6 @@ class GameMap {
       pop();
     }
   }
-  
 }
 
 class Node {
