@@ -11,6 +11,10 @@ let branchButton;
 let upElevationButton;
 let downElevationButton;
 
+let importButton;
+let exportButton;
+let jsonInput;
+
 let allButtons = [];
 
 function makeCommandButton(x, y, width, height, text, isEnabledFunc, onPressFunc) {
@@ -131,9 +135,34 @@ function makeButtons() {
       }
     }
   )
+
+  importButton = makeCommandButton(280, 10, 200, 30, "Import JSON", 
+    () => {
+      return !run;
+    },
+    () => {
+      importMap(jsonInput.value());
+    }
+  )
+  exportButton = makeCommandButton(280, 50, 200, 30, "Export JSON",
+    () => {
+      return !run && maps.length > 0;
+    },
+    () => {
+      jsonInput.value(exportMap());
+    }
+  )
+
+  // TODO: 
+  jsonInput = createInput("");
+  jsonInput.position(330, 100);
+  jsonInput.size(150);
 }
 
 function overlappingButtons() {
+  if (collidePointRect(mouseX, mouseY, 330, 100, 150, 20)) {
+    return true;
+  }
   for (let btn of allButtons) {
     if (btn.hovering) {
       return true;
@@ -143,6 +172,10 @@ function overlappingButtons() {
 }
 
 function updateButtons() {
+  push();
+  fill(255);
+  text("JSON: ", 280, 107);
+  pop();
   fastForwardButton.text = "Speed x" + monke + " (f)";
   for (let btn of allButtons) {
     btn.draw();

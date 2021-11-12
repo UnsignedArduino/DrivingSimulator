@@ -138,12 +138,12 @@ function draw() {
     push();
     textAlign(LEFT);
     fill(255);
-    text("Frame: " + framesRan + (level == 0 ? "" : "/" + maxfs), 280, 20);
-    text("Traffic flow: " + trafficFlow, 280, 35);
+    text("Frame: " + framesRan + (level == 0 ? "" : "/" + maxfs), 490, 20);
+    text("Traffic flow: " + trafficFlow, 490, 35);
     pixelsTraveled /= cars.length;
     averageSpeed = round(pixelsTraveled * frameRate() / monke);
     pixelsTraveled = 0;
-    text("Average speed: " + lastSpeed + " px/sec", 280, 50);
+    text("Average speed: " + lastSpeed + " px/sec", 490, 50);
     pop();
   }
 
