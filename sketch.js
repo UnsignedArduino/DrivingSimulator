@@ -397,7 +397,14 @@ function exportMap() {
     exportMaps.push(exportMap);
   }
   let exportObj = {maps: exportMaps};
-  return JSON.stringify(exportObj);
+  let json = JSON.stringify(exportObj);
+  if (keyIsPressed && keyCode == SHIFT) {
+    console.log("Returning unzipped JSON");
+    return json;
+  } else {
+    console.log("Returning zipped JSON");
+    return "C" + zip(json);
+  }
 }
 
 function generateImportNode(node) {
@@ -415,6 +422,12 @@ function generateImportNode(node) {
 }
 
 function importMap(jsonStuff) {
+  if (jsonStuff.charAt(0) != "{") {
+    console.log("Unzipping JSON");
+    jsonStuff = unzip(jsonStuff.slice(1, jsonStuff.length))
+  } else {
+    console.log("Using as unzipped JSON");
+  }
   let importObj = JSON.parse(jsonStuff);
   clearMap();
   for (let importMap of importObj["maps"]) {
