@@ -34,6 +34,8 @@ let branchNum = 0;
 let drawLayer = 0;
 let fpsToShow;
 let maxfs = 100000;
+let straightX = false
+let straightY = false;
 // let maxfs = 1000;
 
 
@@ -279,7 +281,17 @@ function updateMouseStuff() {
     return;
   }
   if (mouseHeld) {
-    if (dist(mouseX, mouseY, prevPos.x, prevPos.y) > clickAccuracy) {
+    let d;
+    if (straightX){
+      d = dist(prevPos.x, mouseY, prevPos.x, prevPos.y)
+    }
+    else if (straightY){
+      d = dist(mouseX, prevPos.y, prevPos.x, prevPos.y)
+    }
+    else{
+      d = dist(mouseX, mouseY, prevPos.x, prevPos.y)
+    }
+    if (d > clickAccuracy) {
       if (!branchMode) {
         // Not branching, add to main path
         whatWouldHappen = "Continue main path";
@@ -475,5 +487,19 @@ function keyPressed() {
   // L
   if (keyCode == 76 && !run) {
     runLevel(3);
+  }
+  if (keyCode == 88){
+    straightX = !straightX
+    if (straightX){
+      straightY = false
+    }
+    console.log(straightX)
+  }
+  if (keyCode == 89){
+    straightY = !straightY
+    if (straightY){
+      straightX = false
+    }
+    console.log(straightY)
   }
 }

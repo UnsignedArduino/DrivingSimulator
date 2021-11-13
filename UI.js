@@ -6,6 +6,8 @@ const disabledColor = "#828282"
 let runButton;
 let fastForwardButton;
 let clearMapButton;
+let lockXButton;
+let lockYButton;
 
 let branchButton;
 let upElevationButton;
@@ -103,6 +105,34 @@ function makeButtons() {
     },
     clearMap
   )
+  lockXButton = makeCheckButton(10, 130, 100, 30, "Lock X (x)",
+    () => {
+      return !run;
+    },
+    () => {
+      return straightX;
+    },
+    () => {
+      straightX = !straightX;
+      if (straightX) {
+        straightY = false;
+      }
+    }
+  )
+  lockYButton = makeCheckButton(10, 170, 100, 30, "Lock Y (y)",
+    () => {
+      return !run;
+    },
+    () => {
+      return straightY;
+    },
+    () => {
+      straightY = !straightY;
+      if (straightY) {
+        straightX = false;
+      }
+    }
+  )
 
   branchButton = makeCheckButton(120, 10, 150, 30, "Branch mode (s)",
     () => {
@@ -153,7 +183,6 @@ function makeButtons() {
     }
   )
 
-  // TODO: 
   jsonInput = createInput("");
   jsonInput.position(330, 100);
   jsonInput.size(150);

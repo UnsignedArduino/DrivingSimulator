@@ -36,7 +36,16 @@ class GameMap {
   }
 
   addNode() {
-    let node = new Node(mouseX, mouseY);
+    let node;
+    if (straightX && this.nodes.length > 0){
+      node = new Node(this.nodes[0].pos.x, mouseY);
+    }
+    else if (straightY && this.nodes.length > 0){
+      node = new Node(mouseX, this.nodes[0].pos.y);
+    }
+    else{
+      node = new Node(mouseX, mouseY);
+    }
     for (let i = 0; i < this.nodes.length; i ++) {
       this.nodes[i].isFinal = false;
     }
@@ -235,7 +244,17 @@ class Node {
   }
 
   addNextNode() {
-    this.nextNodes.push(new Node(mouseX, mouseY));
+    let node;
+    if (straightX && this.nextNodes.length > 0){
+      node = new Node(this.nextNodes[0].pos.x, mouseY);
+    }
+    else if (straightY && this.nextNodes.length > 0){
+      node = new Node(mouseX, this.nextNodes[0].pos.y);
+    }
+    else{
+      node = new Node(mouseX, mouseY);
+    }
+    this.nextNodes.push(node);
     if (this.nextNodes.length == 1) {
       this.nextNodes[0].pos = this.pos.copy();
     }
@@ -319,6 +338,13 @@ class Node {
       noStroke();
       for (let n = 0; n < this.nextNodes.length; n ++) {
         circle(this.nextNodes[n].pos.x, this.nextNodes[n].pos.y, 5)
+        if (n % 10 == 0 && n<this.nextNodes.length-2) {
+          let p = this.nextNodes[n].pos.copy();
+          let m = this.nextNodes[n + 1].pos.copy();
+          let v = p5.Vector.sub(m, p);
+          v.setMag(5);
+          drawArrow(p, v, "blue")
+        }
       } 
       pop();
     }
